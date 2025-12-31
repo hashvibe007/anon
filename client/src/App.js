@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import './App.css';
 import { generateRandomName, validateName } from './nameGenerator';
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:3001';
+const SOCKET_URL = window.ENV?.SOCKET_URL || process.env.REACT_APP_SOCKET_URL || 'http://localhost:3001';
 
 function App() {
   const [socket, setSocket] = useState(null);
