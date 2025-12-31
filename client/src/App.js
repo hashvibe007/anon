@@ -34,10 +34,21 @@ function App() {
 
   useEffect(() => {
     const savedName = localStorage.getItem('anonChatUserName');
+    const savedGender = localStorage.getItem('anonChatUserGender');
+    const savedPreference = localStorage.getItem('anonChatGenderPreference');
+
     if (savedName) {
       setUserName(savedName);
     } else {
       setShowNameForm(true);
+    }
+
+    if (savedGender) {
+      setUserGender(savedGender);
+    }
+
+    if (savedPreference) {
+      setGenderPreference(savedPreference);
     }
   }, []);
 
@@ -121,6 +132,10 @@ function App() {
   };
 
   const proceedToChat = () => {
+    // Save gender and preference to localStorage
+    localStorage.setItem('anonChatUserGender', userGender);
+    localStorage.setItem('anonChatGenderPreference', genderPreference);
+
     setShowGenderForm(false);
     setShowVideoAd(false);
     startChat(userName);
@@ -156,15 +171,25 @@ function App() {
   const handleNewChat = () => {
     if (userName) {
       setAdWatched(false);
-      setGenderPreference('anyone');
-      setShowGenderForm(true);
+
+      // If user has saved preferences, start chat directly
+      // Otherwise, show the gender form
+      if (userGender) {
+        startChat(userName);
+      } else {
+        setGenderPreference('anyone');
+        setShowGenderForm(true);
+      }
     }
   };
 
   const handleChangeName = () => {
+    // Reset all preferences when user wants to change them
     setShowNameForm(true);
     setNameInput('');
     setNameError('');
+    setUserGender('');
+    setGenderPreference('anyone');
   };
 
   const sendMessage = (e) => {
@@ -225,7 +250,7 @@ function App() {
                   New Chat
                 </button>
                 <button onClick={handleChangeName} className="btn btn-secondary">
-                  Change Name
+                  Change Preferences
                 </button>
               </>
             )}
