@@ -16,6 +16,11 @@ function App() {
   const [nameInput, setNameInput] = useState('');
   const [nameError, setNameError] = useState('');
   const [showNameForm, setShowNameForm] = useState(false);
+  const [showGenderForm, setShowGenderForm] = useState(false);
+  const [userGender, setUserGender] = useState('');
+  const [genderPreference, setGenderPreference] = useState('anyone');
+  const [showVideoAd, setShowVideoAd] = useState(false);
+  const [adWatched, setAdWatched] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -99,13 +104,42 @@ function App() {
     localStorage.setItem('anonChatUserName', name);
     setNameError('');
     setShowNameForm(false);
-    startChat(name);
+    setShowGenderForm(true);
+  };
+
+  const handleGenderSubmit = (e) => {
+    e.preventDefault();
+
+    // If male selected female preference, show video ad first
+    if (userGender === 'male' && genderPreference === 'female' && !adWatched) {
+      setShowVideoAd(true);
+      return;
+    }
+
+    // Proceed to chat
+    proceedToChat();
+  };
+
+  const proceedToChat = () => {
+    setShowGenderForm(false);
+    setShowVideoAd(false);
+    startChat(userName);
+  };
+
+  const handleAdComplete = () => {
+    setAdWatched(true);
+    setShowVideoAd(false);
+    proceedToChat();
   };
 
   const startChat = (name) => {
     const nameToUse = name || userName;
     if (socket && nameToUse) {
-      socket.emit('findPartner', { userName: nameToUse });
+      socket.emit('findPartner', {
+        userName: nameToUse,
+        gender: userGender,
+        preference: genderPreference
+      });
       setMessages([]);
     }
   };
@@ -121,7 +155,9 @@ function App() {
 
   const handleNewChat = () => {
     if (userName) {
-      startChat(userName);
+      setAdWatched(false);
+      setGenderPreference('anyone');
+      setShowGenderForm(true);
     }
   };
 
@@ -164,7 +200,17 @@ function App() {
         <p className="tagline">Chat anonymously with random strangers</p>
       </header>
 
-      <div className="chat-container">
+      <div className="app-wrapper">
+        {/* Left Sidebar Ad */}
+        <aside className="side-ad-left">
+          <div className="side-ad-banner">
+            {/* AdSense Skyscraper Ad - Left */}
+            <div>Ad Space<br/>160x600</div>
+          </div>
+        </aside>
+
+        <main className="main-content">
+          <div className="chat-container">
         <div className="status-bar">
           <div className={`status-indicator ${status}`}>
             {status === 'disconnected' && !userName && 'Enter name to start'}
@@ -192,6 +238,86 @@ function App() {
         </div>
 
         <div className="messages-container">
+          {showVideoAd && (
+            <div className="modal-overlay">
+              <div className="video-ad-container">
+                <div className="ad-placeholder">
+                  <p className="ad-label">Advertisement</p>
+                  <div className="video-ad-player">
+                    {/* Video ad will play here */}
+                    <div className="ad-simulation">
+                      <p>Video Ad Playing...</p>
+                      <p className="ad-timer">This is where the video ad will display</p>
+                    </div>
+                  </div>
+                  <button onClick={handleAdComplete} className="btn btn-primary btn-skip">
+                    Continue to Chat
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showGenderForm && status === 'disconnected' && (
+            <div className="welcome-message">
+              <h2>One more step...</h2>
+              <form onSubmit={handleGenderSubmit} className="gender-form">
+                <div className="form-group">
+                  <label>What's your gender?</label>
+                  <div className="gender-options">
+                    <button
+                      type="button"
+                      className={`gender-btn ${userGender === 'male' ? 'selected' : ''}`}
+                      onClick={() => setUserGender('male')}
+                    >
+                      Male
+                    </button>
+                    <button
+                      type="button"
+                      className={`gender-btn ${userGender === 'female' ? 'selected' : ''}`}
+                      onClick={() => setUserGender('female')}
+                    >
+                      Female
+                    </button>
+                    <button
+                      type="button"
+                      className={`gender-btn ${userGender === 'other' ? 'selected' : ''}`}
+                      onClick={() => setUserGender('other')}
+                    >
+                      Other
+                    </button>
+                  </div>
+                </div>
+
+                {userGender === 'male' && (
+                  <div className="form-group">
+                    <label>Chat with?</label>
+                    <div className="preference-options">
+                      <button
+                        type="button"
+                        className={`preference-btn ${genderPreference === 'anyone' ? 'selected' : ''}`}
+                        onClick={() => setGenderPreference('anyone')}
+                      >
+                        Anyone
+                      </button>
+                      <button
+                        type="button"
+                        className={`preference-btn ${genderPreference === 'female' ? 'selected' : ''}`}
+                        onClick={() => setGenderPreference('female')}
+                      >
+                        Females
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <button type="submit" className="btn btn-primary btn-large" disabled={!userGender}>
+                  Start Matching
+                </button>
+              </form>
+            </div>
+          )}
+
           {showNameForm && status === 'disconnected' && (
             <div className="welcome-message">
               <h2>{userName ? 'Change Your Name' : 'Welcome to AnonChat'}</h2>
@@ -226,10 +352,21 @@ function App() {
             </div>
           )}
 
-          {!showNameForm && messages.length === 0 && status === 'disconnected' && userName && (
+          {!showNameForm && !showGenderForm && messages.length === 0 && status === 'disconnected' && userName && (
             <div className="welcome-message">
               <h2>Welcome back, {userName}!</h2>
               <p>Click "New Chat" to connect with a random stranger</p>
+              <div className="ad-display">
+                {/* AdSense Display Ad - Post Chat */}
+                <div>Display Ad Space (728x90)</div>
+              </div>
+            </div>
+          )}
+
+          {status === 'waiting' && messages.length > 0 && (
+            <div className="ad-display">
+              {/* AdSense Display Ad - Waiting Screen */}
+              <div>Display Ad Space (300x250)</div>
             </div>
           )}
 
@@ -272,6 +409,16 @@ function App() {
             </button>
           </form>
         )}
+          </div>
+        </main>
+
+        {/* Right Sidebar Ad */}
+        <aside className="side-ad-right">
+          <div className="side-ad-banner">
+            {/* AdSense Skyscraper Ad - Right */}
+            <div>Ad Space<br/>160x600</div>
+          </div>
+        </aside>
       </div>
 
       <footer className="footer">

@@ -5,6 +5,47 @@
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 }
 
+.app-wrapper {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.side-ad-left,
+.side-ad-right {
+  width: 160px;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.side-ad-banner {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  width: 160px;
+  height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  font-size: 0.75rem;
+  text-align: center;
+  position: sticky;
+  top: 1rem;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .header {
   background: rgba(255, 255, 255, 0.05);
   padding: 1.5rem;
@@ -359,6 +400,17 @@
   font-size: 0.85rem;
 }
 
+@media (max-width: 1200px) {
+  .side-ad-left,
+  .side-ad-right {
+    display: none;
+  }
+
+  .app-wrapper {
+    gap: 0;
+  }
+}
+
 @media (max-width: 768px) {
   .header h1 {
     font-size: 1.5rem;
@@ -433,5 +485,161 @@
 
   .btn-send {
     padding: 0.8rem 1.2rem;
+  }
+}
+
+/* Gender Form Styles */
+.gender-form {
+  width: 100%;
+  max-width: 500px;
+  margin: 2rem auto;
+}
+
+.form-group {
+  margin-bottom: 2rem;
+}
+
+.form-group label {
+  display: block;
+  color: #00d9ff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.gender-options,
+.preference-options {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.gender-btn,
+.preference-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 1rem 1.5rem;
+  border: 2px solid rgba(0, 217, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #a7a7a7;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gender-btn:hover,
+.preference-btn:hover {
+  background: rgba(0, 217, 255, 0.1);
+  border-color: #00d9ff;
+  transform: translateY(-2px);
+  color: #eee;
+}
+
+.gender-btn.selected,
+.preference-btn.selected {
+  background: rgba(0, 217, 255, 0.2);
+  border-color: #00d9ff;
+  color: #00d9ff;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+}
+
+/* Video Ad Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.video-ad-container {
+  width: 90%;
+  max-width: 800px;
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.ad-placeholder {
+  text-align: center;
+}
+
+.ad-label {
+  color: #777;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.video-ad-player {
+  background: #000;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-simulation {
+  color: #00d9ff;
+  text-align: center;
+}
+
+.ad-simulation p {
+  margin: 0.5rem 0;
+}
+
+.ad-timer {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.btn-skip {
+  margin-top: 1rem;
+}
+
+/* Display Ad Placeholders */
+.ad-display {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .gender-btn,
+  .preference-btn {
+    min-width: 100px;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .video-ad-player {
+    min-height: 250px;
+  }
+
+  .video-ad-container {
+    padding: 1rem;
   }
 }

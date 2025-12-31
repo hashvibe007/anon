@@ -17,16 +17,51 @@ const io = socketIo(server, {
 let waitingUsers = [];
 const activePairs = new Map();
 const userNames = new Map();
+const userGenders = new Map();
+const userPreferences = new Map();
 
 io.on('connection', (socket) => {
   console.log('New user connected:', socket.id);
 
   socket.on('findPartner', (data) => {
     const userName = data.userName || 'Anonymous';
-    userNames.set(socket.id, userName);
+    const gender = data.gender || 'other';
+    const preference = data.preference || 'anyone';
 
-    if (waitingUsers.length > 0) {
-      const partner = waitingUsers.shift();
+    userNames.set(socket.id, userName);
+    userGenders.set(socket.id, gender);
+    userPreferences.set(socket.id, preference);
+
+    let partner = null;
+
+    // Try to find a match based on preference
+    if (preference !== 'anyone') {
+      // Current user has a preference (e.g., male wants female)
+      const partnerIndex = waitingUsers.findIndex(waitingSocket => {
+        const waitingGender = userGenders.get(waitingSocket.id);
+        return waitingGender === preference;
+      });
+
+      if (partnerIndex !== -1) {
+        partner = waitingUsers.splice(partnerIndex, 1)[0];
+      }
+    } else {
+      // Current user has no preference, but check if any waiting user prefers this gender
+      const partnerIndex = waitingUsers.findIndex(waitingSocket => {
+        const waitingPreference = userPreferences.get(waitingSocket.id);
+        const currentGender = gender;
+        return waitingPreference === currentGender;
+      });
+
+      if (partnerIndex !== -1) {
+        partner = waitingUsers.splice(partnerIndex, 1)[0];
+      } else if (waitingUsers.length > 0) {
+        // No preference match, just take the first waiting user
+        partner = waitingUsers.shift();
+      }
+    }
+
+    if (partner) {
       const partnerName = userNames.get(partner.id) || 'Anonymous';
 
       activePairs.set(socket.id, partner.id);
@@ -41,11 +76,11 @@ io.on('connection', (socket) => {
         partnerName: userName
       });
 
-      console.log(`Paired: ${userName} (${socket.id}) with ${partnerName} (${partner.id})`);
+      console.log(`Paired: ${userName} (${gender}, wants ${preference}) with ${partnerName} (${userGenders.get(partner.id)})`);
     } else {
       waitingUsers.push(socket);
       socket.emit('waiting');
-      console.log(`User ${userName} (${socket.id}) is waiting for a partner`);
+      console.log(`User ${userName} (${gender}, wants ${preference}) is waiting for a partner`);
     }
   });
 
@@ -101,6 +136,8 @@ io.on('connection', (socket) => {
     }
 
     userNames.delete(socket.id);
+    userGenders.delete(socket.id);
+    userPreferences.delete(socket.id);
   }
 });
 
